@@ -14,6 +14,7 @@ export default function TodoList() {
     {
       id: 1,
       todo: 'Complete react native',
+      complete: true,
     },
   ]);
   const [title, setTitle] = useState('');
@@ -29,9 +30,10 @@ export default function TodoList() {
       {
         id: todos.length + 1,
         todo: title,
+        complete: false,
       },
     ]);
-    setTitle("")
+    setTitle('');
   };
   const deleteTodo = (id: number) => {
     const todo = todos.filter((ele, _) => ele.id !== id);
@@ -46,12 +48,21 @@ export default function TodoList() {
   };
 
   const saveTodo = ({ id }: { id: number }) => {
-   let findList = todos.find((ele,_)=>ele.id === id);
-   if(!findList) return;
-   setTodos(todos.map(todo =>
-     todo.id === id ? { ...todo, todo: updatedTitle } : todo
-   ));
+    let findList = todos.find((ele, _) => ele.id === id);
+    if (!findList) return;
+    setTodos(
+      todos.map(todo =>
+        todo.id === id ? { ...todo, todo: updatedTitle } : todo,
+      ),
+    );
   };
+
+  const toggleComplete = (id: number) => {
+    setTodos(
+      todos.map(todo => (todo.id === id ? { ...todo, complete: true } : todo)),
+    );
+  };
+
   return (
     <View style={style.todoBody}>
       <View style={style.todoInput}>
@@ -77,7 +88,16 @@ export default function TodoList() {
                     defaultValue={ele.todo}
                   />
                 ) : (
-                  <Text style={style.todoText}>{ele.todo}</Text>
+                  <TouchableHighlight
+                    disabled={ele.complete}
+                    onPress={() => toggleComplete(ele.id)}
+                  >
+                    <Text
+                      style={ele.complete ? style.completetodo : style.todoText}
+                    >
+                      {ele.todo}
+                    </Text>
+                  </TouchableHighlight>
                 )}
               </View>
               <View style={style.viewButtons}>
@@ -85,13 +105,14 @@ export default function TodoList() {
                   <TouchableHighlight
                     onPress={() => {
                       setIsEdit({ ...isEdit, isActive: false });
-                      saveTodo({ id: ele.id});
+                      saveTodo({ id: ele.id });
                     }}
                   >
                     <Text>Save</Text>
                   </TouchableHighlight>
                 ) : (
                   <TouchableHighlight
+                    disabled={ele.complete}
                     onPress={() =>
                       editTodo({
                         id: ele.id,
@@ -170,5 +191,8 @@ const style = StyleSheet.create({
     fontStyle: 'normal',
     fontSize: 20,
     textAlign: 'center',
+  },
+  completetodo: {
+    textDecorationLine: 'line-through',
   },
 });
