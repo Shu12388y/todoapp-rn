@@ -17,6 +17,7 @@ export default function TodoList() {
     },
   ]);
   const [title, setTitle] = useState('');
+  const [updatedTitle, setUpdateTitle] = useState('');
   const [isEdit, setIsEdit] = useState({
     id: 0,
     isActive: false,
@@ -30,17 +31,26 @@ export default function TodoList() {
         todo: title,
       },
     ]);
+    setTitle("")
   };
   const deleteTodo = (id: number) => {
     const todo = todos.filter((ele, _) => ele.id !== id);
     setTodos(todo);
   };
 
-  const editTodo = ({ id, title }: { id: number; title: string }) => {
+  const editTodo = ({ id }: { id: number }) => {
     setIsEdit({
       id: id,
       isActive: true,
     });
+  };
+
+  const saveTodo = ({ id }: { id: number }) => {
+   let findList = todos.find((ele,_)=>ele.id === id);
+   if(!findList) return;
+   setTodos(todos.map(todo =>
+     todo.id === id ? { ...todo, todo: updatedTitle } : todo
+   ));
   };
   return (
     <View style={style.todoBody}>
@@ -63,7 +73,7 @@ export default function TodoList() {
               <View>
                 {isEdit.isActive && isEdit.id === ele.id ? (
                   <TextInput
-                    onChangeText={text => setTitle(text)}
+                    onChangeText={text => setUpdateTitle(text)}
                     defaultValue={ele.todo}
                   />
                 ) : (
@@ -71,17 +81,28 @@ export default function TodoList() {
                 )}
               </View>
               <View style={style.viewButtons}>
-                <TouchableHighlight
-                  onPress={() =>
-                    editTodo({
-                      id: ele.id,
-                      title: title,
-                    })
-                  }
-                  style={style.editButton}
-                >
-                  <Text style={style.buttonColor}>Edit</Text>
-                </TouchableHighlight>
+                {isEdit.id === ele.id && isEdit.isActive ? (
+                  <TouchableHighlight
+                    onPress={() => {
+                      setIsEdit({ ...isEdit, isActive: false });
+                      saveTodo({ id: ele.id});
+                    }}
+                  >
+                    <Text>Save</Text>
+                  </TouchableHighlight>
+                ) : (
+                  <TouchableHighlight
+                    onPress={() =>
+                      editTodo({
+                        id: ele.id,
+                      })
+                    }
+                    style={style.editButton}
+                  >
+                    <Text style={style.buttonColor}>Edit</Text>
+                  </TouchableHighlight>
+                )}
+
                 <TouchableHighlight
                   onPress={() => deleteTodo(ele.id)}
                   style={style.deleteButton}
